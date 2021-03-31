@@ -1,0 +1,25 @@
+{
+  "compilerOptions": {
+//    "module": "commonjs",
+    "baseUrl": ".",
+    "target": "es6",
+    "sourceMap": true,
+    "lib": ["dom","es6"],
+    "allowJs": true,
+    "outDir": "build",
+    "rootDir": "src",
+    "strict": true,
+    "noImplicitAny": false,
+    "esModuleInterop": true,
+    "importHelpers": true,
+    "moduleResolution": "node",
+    "paths": {
+      "tslib" : ["node_modules/tslib/tslib.js"]
+    }
+//    "resolveJsonModule": true
+  },
+  "exclude": [
+    "build",
+    "node_modules"
+  ]
+}
