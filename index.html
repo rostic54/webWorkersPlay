@@ -3,40 +3,39 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport"
-          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+          content="width=device-width, initial-scale=1.0, maximum-scale=6.0, minimum-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <link rel="preconnect" href="https://fonts.gstatic.com">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@100;400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="styles/styles.css">
     <title>Cat box</title>
 </head>
 <body>
 <div class="container">
     <button id="startCount">Click-1</button>
+    <button id="checkResult">Results</button>
+    <button id="clearStores">Clear all animals</button>
+    <button id="downloadResult">Download result</button>
     <button id="secondBtn" onclick="checker()">Second</button>
-    <div class="distributor"></div>
+    <div id="distributor" class="distributor"></div>
     <div class="animal-blocks">
-        <div id="catsBox" class="cats-box"></div>
-        <div id="dogsBox" class="dog-box"></div>
+        <div class="wrap">
+            <span class="container-icon"><img alt="cat" src="src/img/cat.png"/></span>
+            <div id="catsBox" class="animal-container cats-box"></div>
+        </div>
+        <div class="wrap">
+            <span class="container-icon"><img alt="dog" src="src/img/dog.jpg"/></span>
+            <div id="dogsBox" class="animal-container dog-box"></div>
+        </div>
     </div>
 </div>
 </body>
-<!--<script src="build/scripts/classes/Tool.js"></script>-->
-<!--<script type="module" src="build/scripts/classes/factories/Animal-factory.js"></script>-->
-<!--<script type="module" src="build/scripts/classes/factories/Presentation-factory.js"></script>-->
-<!--<script type="module" src="build/scripts/workers/Worker-helper.js"></script>-->
-<!--<script type="module" src="build/scripts/workers/worker.js"></script>-->
-<!--<script type="module" src="build/scripts/workers/worker-api-helper.js"></script>-->
-<!--<script type="module" src="build/scripts/classes/Presentation.js"></script>-->
-<!--<script type="module" src="build/scripts/classes/Animal.js"></script>-->
-<!--<script type="module" src="build/scripts/classes/tool.js"></script>-->
 <script type="module" src="build/scripts/script.js"></script>
 <script>
     document.addEventListener('DOMContentLoaded', function () {
-
         function checker() {
             console.log('site is still work');
         }
-
-
     })
 </script>
 </html>

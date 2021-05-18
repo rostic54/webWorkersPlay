@@ -1,6 +1,7 @@
-import { PresentationType} from "../../interfaces/presentation.interface";
+import {PresentationType} from "../../interfaces/presentation.interface";
 import IPresentationDetail = PresentationType.IPresentationDetail;
 import IPresentation = PresentationType.IPresentation;
+import {Tool} from "./tool.js";
 
 export class Presentation implements IPresentation {
   readonly height: number;
@@ -10,6 +11,7 @@ export class Presentation implements IPresentation {
   private preViewPopup: HTMLDivElement | null = null;
   private presentationUrls: IPresentationDetail[] = [];
   private showPopup: boolean = true;
+  private toolBox = Tool.getInstance();
 
   constructor({height, width, url}) {
     this.height = height;
@@ -29,7 +31,7 @@ export class Presentation implements IPresentation {
     // this.popupHandlerFuncRef = this.popupOpen;
     img.addEventListener('pointerdown', () => this.showPopup = true)
     img.addEventListener('pointerup', (ev) => {
-      if (this.showPopup) {
+      if (this.showPopup && ev.button === 0 && ev.buttons === 0) {
         this.popupOpen(ev);
       }
     });
@@ -44,17 +46,23 @@ export class Presentation implements IPresentation {
 
   private popupOpen({target}): void {
     this.preViewPopup = document.createElement('div');
+    const width = Number(target.attributes.w.value) > document.body.clientWidth ? document.body.clientWidth : target.attributes.w.value;
+    const height = Number(target.attributes.h.value) > document.body.clientHeight ? document.body.clientHeight : target.attributes.h.value;
     Object.assign(
       this.preViewPopup.style,
       {
-        width: `${target.attributes.w.value}px`,
-        height: `${target.attributes.h.value}px`,
         position: 'fixed',
         zIndex: '2',
         top: '50% ',
         left: '50%',
-        marginLeft: `-${target.attributes.w.value / 2}px`,
-        marginTop: `-${target.attributes.h.value / 2}px`,
+        width: `${width - 20}px`,
+        padding: `10px`,
+        height: `${height - 20}px`,
+        backgroundPosition: 'center',
+        backgroundSize: 'cover',
+        border: '10px solid gray',
+        marginLeft: `-${(width / 2) + 10}px`,
+        marginTop: `-${(height / 2) + 10}px`,
         backgroundImage: `url(${target.attributes.src.value})`
       })
     document.body.append(this.preViewPopup);
@@ -62,25 +70,16 @@ export class Presentation implements IPresentation {
   }
 
   private createShadowBox(): void {
-    this.boxShadowLink = document.createElement('div');
-    Object.assign(
-      this.boxShadowLink.style,
-      {
-        position: 'fixed',
-        left: '0',
-        top: '0',
-        zIndex: '1',
-        width: '100%',
-        height: '100%',
-        backgroundColor: 'rgba(0,0,0,.4)',
-      })
+    this.boxShadowLink = this.toolBox.blackBoxCreator();
     document.body.append(this.boxShadowLink);
+
     this.boxShadowLink.addEventListener('click', () => this.closePreview())
     this.preViewPopup?.addEventListener('click', () => this.closePreview())
   }
 
   private closePreview(): void {
     this.boxShadowLink?.removeEventListener('click', this.popupOpen);
+    this.preViewPopup?.removeEventListener('click', this.popupOpen);
     this.boxShadowLink?.remove();
     this.preViewPopup?.remove();
   }

@@ -22,19 +22,11 @@ const animalUrls = [
             'x-api-key': '724b0a85-a654-4937-a37a-3b8d2b698ca7',
         },
     }).then(film => film.json())
-    // return await film.json();
 }
 
 
 ctxHelper.addEventListener('message', (e) => {
     getPetPicture(e.data).then(([d]) => {
-        // console.log(d)
-        // const animalInfo: = {
-        //     url: d.url,
-        //     w: d.width,
-        //     h: d.height,
-        //     animalType: AnimalType.CAT
-        // };
-        ctxHelper.postMessage({...d, ...{animalType: 0}});
+        ctxHelper.postMessage({...d, ...{animalType: null}});
     });
 })

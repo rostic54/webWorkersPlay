@@ -16,7 +16,7 @@ export class AnimalFactory implements IAnimalFactory{
   constructor(data: IAnimalDetail) {
     this.animalDetail = data;
     this.animalDetail.type = this.parseUrl(data.url) === -1 ? AnimalType.DOG : AnimalType.CAT;
-    console.log( this.animalDetail);
+    this.animalDetail.containerType = data.containerType || AnimalType.DISTRIBUTOR;
 
     this.PresentationEntity = new PresentationFactory(this.animalDetail).getCreatedEntity();
     this.AnimalEntity = new Animal(this.animalDetail, this.PresentationEntity)
@@ -24,7 +24,6 @@ export class AnimalFactory implements IAnimalFactory{
 
   private parseUrl(urlPath: string) {
     const url = new URL(urlPath);
-    console.log(url);
     return url.hostname.split('.')[1].indexOf('cat')
   }
 

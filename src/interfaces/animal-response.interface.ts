@@ -11,8 +11,10 @@ export namespace AnimalModel {
         type: AnimalType;
         id: string;
         animalImg: HTMLImageElement;
+        setAnimalContainerType(type: AnimalType): void;
         getDetailForImage(): IPresentationDetail;
         addAnimalUrl(imageDetail: IPresentationDetail): void;
+        addListener(img: HTMLImageElement): void;
     }
 
     export interface IAnimalDetail {
@@ -21,7 +23,8 @@ export namespace AnimalModel {
         height: number;
         url: string;
         width: number;
-        type: AnimalType
+        type: AnimalType;
+        containerType: AnimalType;
     }
 
     export interface IAnimalFactory {
