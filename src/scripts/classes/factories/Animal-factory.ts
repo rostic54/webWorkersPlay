@@ -9,7 +9,7 @@ import IAnimalFactory = AnimalModel.IAnimalFactory;
 import IAnimal = AnimalModel.IAnimal;
 
 export class AnimalFactory implements IAnimalFactory{
-  public AnimalEntity: IAnimal;
+  public readonly AnimalEntity: IAnimal;
   public PresentationEntity: IPresentation;
   public animalDetail: IAnimalDetail;
 

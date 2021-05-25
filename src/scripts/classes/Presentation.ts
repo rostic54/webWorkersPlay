@@ -1,7 +1,7 @@
 import {PresentationType} from "../../interfaces/presentation.interface";
 import IPresentationDetail = PresentationType.IPresentationDetail;
 import IPresentation = PresentationType.IPresentation;
-import {Tool} from "./tool.js";
+import {Tool} from "./Tool.js";
 import {ImageClasses} from "../../enum/image-classes.js";
 
 export class Presentation implements IPresentation {

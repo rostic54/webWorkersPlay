@@ -1,5 +1,5 @@
 import {IMain} from "../interfaces/main.interface";
-import {Tool} from "./classes/tool.js";
+import {Tool} from "./classes/Tool.js";
 import {Distributor} from "./classes/Distributor.js";
 import {Animal} from "./classes/Animal.js";
 import {CatContainer} from "./classes/Cat-container.js";
@@ -8,12 +8,14 @@ import {StoreService} from "./services/store.service.js";
 import {AnimalModel} from "../interfaces/animal-response.interface";
 import IAnimalDetail = AnimalModel.IAnimalDetail;
 import IAnimal = AnimalModel.IAnimal;
-import {Comparator} from "./classes/comparator.js";
+import {Comparator} from "./classes/Comparator.js";
 
 class Main implements IMain {
   private storeService!: StoreService;
   private comparator!: Comparator;
+  private disablePlayBtn = true;
   public startBtn!: HTMLButtonElement | null;
+  public newGameBtn!: HTMLButtonElement | null;
   public resultsBtn!: HTMLButtonElement | null;
   public clearBtn!: HTMLButtonElement | null;
   public downloadResultBtn!: HTMLButtonElement | null;
@@ -30,6 +32,7 @@ class Main implements IMain {
   public init(): void {
     this.getButtonsRefs();
     this.getAllInstances();
+    this.setConditionOfBtns(false);
 
     this.isStoreReady().then(res => {
       console.log('RES IN MAIN:', res);
@@ -55,7 +58,9 @@ class Main implements IMain {
   }
 
   public getImage(): void {
-    this.toolBox.requestImage();
+    if (this.disablePlayBtn) {
+      this.toolBox.requestImage();
+    }
   }
 
   public elementImg(animal: IAnimal) {
@@ -84,6 +89,12 @@ class Main implements IMain {
     if (this.startBtn !== null) {
       this.listenerIds.push(this.startBtn.addEventListener('click', () => this.getImage()));
     }
+    if (this.newGameBtn !== null) {
+      this.listenerIds.push(this.newGameBtn.addEventListener('click', () => {
+        this.clearStore();
+        this.setConditionOfBtns(false);
+      }));
+    }
     if (this.clearBtn !== null) {
       this.listenerIds.push(this.clearBtn.addEventListener('click', () => {
         this.clearStore();
@@ -94,23 +105,28 @@ class Main implements IMain {
       this.listenerIds.push(this.resultsBtn.addEventListener(
         'click',
         () => {
-          this.comparator.showResults();
+          if (this.disablePlayBtn) {
+            this.comparator.showResults();
+            this.clearDistributorContainer();
+          }
           this.setConditionOfBtns(true);
-          this.clearDistributorContainer();
         })
       );
     }
   }
 
   private setConditionOfBtns(condition: boolean): void {
-    if ( this.startBtn &&  this.resultsBtn) {
-      this.startBtn.disabled = condition;
+    if ( this.startBtn &&  this.resultsBtn && this.newGameBtn) {
+      this.startBtn.hidden = condition;
+      this.newGameBtn.hidden = !condition;
+      this.disablePlayBtn = !condition;
       this.resultsBtn.disabled = condition;
     }
   }
 
   private getButtonsRefs(): void {
     this.startBtn = document.getElementById('startCount') as HTMLButtonElement;
+    this.newGameBtn = document.getElementById('newGame') as HTMLButtonElement;
     this.resultsBtn = document.getElementById('checkResult') as HTMLButtonElement;
     this.clearBtn = document.getElementById('clearStores') as HTMLButtonElement;
     this.downloadResultBtn = document.getElementById('downloadResult') as HTMLButtonElement;

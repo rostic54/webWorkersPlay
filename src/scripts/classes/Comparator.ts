@@ -3,7 +3,7 @@ import {AnimalType} from "../../enum/animal-type.js";
 import {CatContainer} from "./Cat-container.js";
 import {DogContainer} from "./Dog-container.js";
 import IAnimal = AnimalModel.IAnimal;
-import {Tool} from "./tool.js";
+import {Tool} from "./Tool.js";
 
 interface IResults {
   catMismatch: number,
