@@ -3,7 +3,8 @@ export namespace PresentationType {
     src: string;
     width: number;
     height: number;
-    addListener(img): void;
+    addListener(img: HTMLImageElement): void;
+    addErrorStateObserver(img: HTMLImageElement): void;
     getPresentationDetail(): IPresentationDetail;
     addAnimalUrl(imgDetail: IPresentationDetail): void
   }

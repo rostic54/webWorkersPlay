@@ -76,7 +76,12 @@ body {
     width: 100%;
     height: 100%;
     border-radius: 50%;
-    box-shadow: inset 0 0 17px 9px #9e9e9e;
+    box-shadow: inset 0 0 17px 9px;
+    color: #9e9e9e;
+}
+
+.animal-blocks .animal-container .img-wrap.error:after {
+    color: red;
 }
 
 .animal-blocks .animal-container img {
@@ -138,12 +143,14 @@ img {
     min-height: 200px;
     min-width: 400px;
 }
-
+/*      POPUP    */
 .popup {
     position: absolute;
     top: 10%;
     left: 50%;
     z-index: 2;
+    display: grid;
+    grid-template-rows: 40px 1fr 40px;
     transform: translate(-50%);
     min-width: 350px;
     min-height: 300px;
@@ -153,13 +160,25 @@ img {
     background-color: white;
 }
 
+.popup .title {
+   margin: 0;
+}
+
 .popup .content {
     position: relative;
+    margin: 15px;
 }
 
 .popup .row {
     display: flex;
     align-items: center;
+    margin: 20px;
+}
+
+.popup .row .label {
+    font-size: 16px;
+    font-weight: 400;
+    margin: 0;
 }
 
 .popup .close-icon {

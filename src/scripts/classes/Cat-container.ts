@@ -7,23 +7,24 @@ import {DogContainer} from "./Dog-container.js";
 import {main} from "../script.js";
 import {AnimalFactory} from "./factories/Animal-factory.js";
 import IAnimalDetail = AnimalModel.IAnimalDetail;
+import {ImageClasses} from "../../enum/image-classes.js";
 
 export class CatContainer {
   private static instance: CatContainer;
-  public storeAnimalEntities: IAnimal[] = [];
+  private readonly catsBoxElement: HTMLDivElement;
+  private readonly distributor: Distributor;
   private containerType = AnimalType.CAT;
-  private catsBoxElement: HTMLElement | null;
-  private containerObserver;
-  private distributor: Distributor;
+  private containerObserver: MutationObserver;
   private config = {
     attributes: false,
     childList: true,
     subtree: false
   };
+  public storeAnimalEntities: IAnimal[] = [];
 
   private constructor() {
     this.distributor = Distributor.getInstance();
-    this.catsBoxElement = document.getElementById(ContainersId.CAT);
+    this.catsBoxElement = document.getElementById(ContainersId.CAT) as HTMLDivElement;
     this.containerObserver = new MutationObserver(this.addAnimal.bind(this));
     this.containerObserver.observe(this.catsBoxElement, this.config);
     this.getCatsFromStore();
@@ -97,7 +98,7 @@ export class CatContainer {
 
   private addAnimalToContainer(img: HTMLImageElement): void {
     const wrap = document.createElement('span');
-    wrap.classList.add('img-wrap');
+    wrap.classList.add(ImageClasses.WRAPPER);
     wrap.append(img);
     this.catsBoxElement?.append(wrap);
   }

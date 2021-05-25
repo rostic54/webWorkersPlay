@@ -7,10 +7,13 @@ import IPresentation = PresentationType.IPresentation;
 import IPresentationDetail = PresentationType.IPresentationDetail;
 import IAnimal = AnimalModel.IAnimal;
 import {MotionController} from "./Motion-controller.js";
+import {ImageClasses} from "../../enum/image-classes.js";
 
 export class Animal implements IAnimal {
   readonly presentationDetail: IPresentation;
   readonly animalInfo: IAnimalDetail;
+  readonly movingEventHandlerRef = this.movingEventHandler.bind(this);
+  readonly showInPopupEventHandlerRef = this.showInPopupEventHandler.bind(this);
   private animalElement!: HTMLImageElement;
   private motionController: MotionController;
 
@@ -47,25 +50,45 @@ export class Animal implements IAnimal {
   public addListener(img: HTMLImageElement): void {
     this.animalElement = img;
     this.presentationDetail.addListener(img);
-    this.dragAndDropEvent(img);
+    this.presentationDetail.addErrorStateObserver(img);
+    this.dragAndDropEvent();
   }
 
   public addAnimalUrl(imageDetail: IPresentationDetail): void {
     this.presentationDetail.addAnimalUrl(imageDetail);
   }
 
-  public dragAndDropEvent(img): void {
-    img.addEventListener('pointerdown', (ev) => {
-      if (ev.button === 0 && ev.buttons === 1) {
-        this.motionController.movingEventListener(ev);
-      }
-    })
-    img.addEventListener('pointerup', (ev) => {
-      if (ev.button === 0 && ev.buttons === 0) {
-        this.motionController.fakePointerupEventEmit();
-      }
-    })
-    img.ondragstart = () => false;
+  public dragAndDropEvent(): void {
+    this.animalElement.addEventListener('pointerdown', this.movingEventHandlerRef);
+    this.animalElement.addEventListener('pointerup', this.showInPopupEventHandlerRef);
+    this.animalElement.ondragstart = () => false;
+  }
+
+  public removeDrugAndDropListener(): void {
+    this.animalElement.removeEventListener('pointerdown', this.movingEventHandlerRef);
+  }
+
+  public removeAllListeners(): void {
+    this.removeDrugAndDropListener();
+    this.animalElement.removeEventListener('pointerup', this.showInPopupEventHandlerRef);
+  }
+
+  public setErrorState(): IAnimal {
+    this.animalImg.classList.add(ImageClasses.INCORRECT);
+    this.removeDrugAndDropListener();
+    return this
+  }
+
+  private movingEventHandler(ev: PointerEvent): void {
+    if (ev.button === 0 && ev.buttons === 1) {
+      this.motionController.movingEventListener(ev);
+    }
+  }
+
+  private showInPopupEventHandler(ev: PointerEvent): void {
+    if (ev.button === 0 && ev.buttons === 0) {
+      this.motionController.fakePointerupEventEmit();
+    }
   }
 
 }

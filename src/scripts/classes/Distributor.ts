@@ -6,8 +6,6 @@ export class Distributor {
   private static instance: Distributor;
   private static storeElem: Element;
   private storeAnimalEntities: IAnimal[] = [];
-  private draggableElement
-  private removeFunctionRef;
 
   private constructor() {
   }
@@ -25,11 +23,15 @@ export class Distributor {
     this.storeAnimalEntities.push(animal);
   }
 
+  public clearStore(): void {
+    this.storeAnimalEntities.forEach((animal: IAnimal) => animal.removeAllListeners());
+    Distributor.storeElem.querySelectorAll("img").forEach((img: HTMLImageElement) => img.remove());
+    this.storeAnimalEntities.length = 0;
+  }
+
   public pickUpAnimal(id: string): IAnimal {
     const ind = this.storeAnimalEntities.findIndex((ent: IAnimal) => ent.id === id);
     return this.storeAnimalEntities.splice(ind, 1)[0];
   }
-
-
 }
 

@@ -2,6 +2,7 @@ import {PresentationType} from "../../interfaces/presentation.interface";
 import IPresentationDetail = PresentationType.IPresentationDetail;
 import IPresentation = PresentationType.IPresentation;
 import {Tool} from "./tool.js";
+import {ImageClasses} from "../../enum/image-classes.js";
 
 export class Presentation implements IPresentation {
   readonly height: number;
@@ -10,8 +11,15 @@ export class Presentation implements IPresentation {
   private boxShadowLink: HTMLDivElement | null = null;
   private preViewPopup: HTMLDivElement | null = null;
   private presentationUrls: IPresentationDetail[] = [];
+  private errorStateObserver: MutationObserver | undefined;
   private showPopup: boolean = true;
   private toolBox = Tool.getInstance();
+
+  private config = {
+    attributes: true,
+    childList: false,
+    subtree: false
+  };
 
   constructor({height, width, url}) {
     this.height = height;
@@ -42,6 +50,11 @@ export class Presentation implements IPresentation {
 
   public addAnimalUrl(imgDetail: IPresentationDetail): void {
     this.presentationUrls.push(imgDetail);
+  }
+
+  public addErrorStateObserver(img: HTMLImageElement) {
+    this.errorStateObserver = new MutationObserver(this.reactOnErrorState.bind(this));
+    this.errorStateObserver.observe(img, this.config);
   }
 
   private popupOpen({target}): void {
@@ -82,6 +95,16 @@ export class Presentation implements IPresentation {
     this.preViewPopup?.removeEventListener('click', this.popupOpen);
     this.boxShadowLink?.remove();
     this.preViewPopup?.remove();
+  }
+
+  private reactOnErrorState(mutRec): void {
+    console.log(mutRec);
+    const wrapper = mutRec[0].target?.closest(`.${ImageClasses.WRAPPER}`);
+    if(mutRec[0].attributeName === 'class' && mutRec[0].target.classList.contains(ImageClasses.INCORRECT)) {
+      wrapper.classList.add('error');
+    } else {
+      wrapper?.classList.remove('error');
+    }
   }
 
 }

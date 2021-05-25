@@ -12,9 +12,10 @@ interface IResults {
 
 export class Comparator {
   static instance: Comparator;
-  toolBox: Tool;
-  catsContainerRef: CatContainer;
-  dogsContainerRef: DogContainer;
+  public toolBox: Tool;
+  public catsContainerRef: CatContainer;
+  public dogsContainerRef: DogContainer;
+  public listenerIds: any = [];
 
   private constructor() {
     this.toolBox = Tool.getInstance();
@@ -38,8 +39,8 @@ export class Comparator {
     let catMismatch: number = 0;
     let dogMismatch: number = 0;
     if (this.catsContainerRef && this.dogsContainerRef) {
-      catMismatch = this.calculateMismatch(this.catsContainerRef.storeAnimalEntities, AnimalType.CAT);
-      dogMismatch = this.calculateMismatch(this.dogsContainerRef.storeAnimalEntities, AnimalType.DOG);
+      catMismatch = this.calculateMismatch(this.catsContainerRef.storeAnimalEntities, AnimalType.CAT).length;
+      dogMismatch = this.calculateMismatch(this.dogsContainerRef.storeAnimalEntities, AnimalType.DOG).length;
     }
     return {
       catMismatch,
@@ -50,29 +51,46 @@ export class Comparator {
   private createDialog(catMismatch: number, dogMismatch: number) {
     const popup = document.createElement('div');
     const title = document.createElement("h2");
+    const download = document.createElement("button");
+    download.setAttribute('id', 'downloadResult');
+    download.innerHTML = 'Download result';
+    title.classList.add('title');
     title.innerHTML = 'Your result:';
     const listOfResults = document.createElement('div');
     listOfResults.innerHTML =
       `<div class="content">
-         <div class="row"><h3>Cats Mismatch:   </h3><span>${catMismatch}</span></div>
-         <div class="row"><h3>Dogs Mismatch:   </h3><span>${dogMismatch}</span></div>
+         <div class="row"><p class="label">Cats Mismatch:   </p><span>${catMismatch}</span></div>
+         <div class="row"><p class="label">Dogs Mismatch:   </p><span>${dogMismatch}</span></div>
        </div>
        <span class="close-icon">X</span>`
-    popup.append(title, listOfResults);
+    popup.append(title, listOfResults, download);
     popup.classList.add('popup')
     document.body.appendChild(popup);
     const boxShadow = this.toolBox.blackBoxCreator();
     document.body.appendChild(boxShadow);
     const closeBtn = listOfResults.querySelector('.close-icon');
+    const downloadBtn = popup.querySelector('#downloadResult')
     if (closeBtn) {
       closeBtn.addEventListener('click', () => {
         popup.remove();
         boxShadow.remove();
       })
     }
+
+    if(downloadBtn) {
+      this.listenerIds.push(downloadBtn.addEventListener('click', () => {
+        const resultData = `
+         Total Scores of Mismatches:
+         Cats container: ${catMismatch}
+         Dogs container: ${dogMismatch}`;
+        this.toolBox.downloadFile( 'animalResults.txt', resultData)
+      }));
+    }
   }
 
-  private calculateMismatch(animalList: IAnimal[], containerType: AnimalType): number {
-    return animalList.filter((animal: IAnimal) => animal.type !== containerType).length
+  private calculateMismatch(animalList: IAnimal[], containerType: AnimalType): IAnimal[] {
+    return animalList
+      .filter((animal: IAnimal) => animal.type !== containerType)
+      .map((animal: IAnimal) => animal.setErrorState())
   }
 }

@@ -15,6 +15,8 @@ export namespace AnimalModel {
         getDetailForImage(): IPresentationDetail;
         addAnimalUrl(imageDetail: IPresentationDetail): void;
         addListener(img: HTMLImageElement): void;
+        removeAllListeners(): void;
+        setErrorState(): IAnimal;
     }
 
     export interface IAnimalDetail {

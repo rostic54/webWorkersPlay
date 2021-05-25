@@ -12,7 +12,8 @@ import {Comparator} from "./classes/comparator.js";
 
 class Main implements IMain {
   private storeService!: StoreService;
-  public startBtn!: HTMLElement | null;
+  private comparator!: Comparator;
+  public startBtn!: HTMLButtonElement | null;
   public resultsBtn!: HTMLButtonElement | null;
   public clearBtn!: HTMLButtonElement | null;
   public downloadResultBtn!: HTMLButtonElement | null;
@@ -20,7 +21,6 @@ class Main implements IMain {
   public distributor!: Distributor;
   public catsContainer!: CatContainer;
   public dogsContainer!: DogContainer;
-  private comparator!: Comparator;
   public animalsList;
   public toolBox;
 
@@ -28,22 +28,15 @@ class Main implements IMain {
   }
 
   public init(): void {
-    this.startBtn = document.getElementById('startCount');
-    this.resultsBtn = document.getElementById('checkResult') as HTMLButtonElement;
-    this.clearBtn = document.getElementById('clearStores') as HTMLButtonElement;
-    this.downloadResultBtn = document.getElementById('downloadResult') as HTMLButtonElement;
-    this.storeService = StoreService.getInstance();
+    this.getButtonsRefs();
+    this.getAllInstances();
+
     this.isStoreReady().then(res => {
       console.log('RES IN MAIN:', res);
       this.storeService.getAllAnimals()
         .then(data => this.animalsList = data)
         .finally(() => console.log('GOTTEN FROM DB: ', this.animalsList))
     });
-    this.distributor = Distributor.getInstance();
-    this.catsContainer = CatContainer.getInstance();
-    this.dogsContainer = DogContainer.getInstance();
-    this.toolBox = Tool.getInstance();
-    this.comparator = Comparator.getInstance();
     this.addEventListeners();
   }
 
@@ -83,25 +76,54 @@ class Main implements IMain {
     }
   }
 
+  public clearDistributorContainer(): void {
+    this.distributor.clearStore();
+  }
+
   private addEventListeners() {
     if (this.startBtn !== null) {
       this.listenerIds.push(this.startBtn.addEventListener('click', () => this.getImage()));
     }
     if (this.clearBtn !== null) {
-      this.listenerIds.push(this.clearBtn.addEventListener('click', () => this.clearStore()));
+      this.listenerIds.push(this.clearBtn.addEventListener('click', () => {
+        this.clearStore();
+        this.setConditionOfBtns(false);
+      }));
     }
     if (this.resultsBtn !== null) {
-      this.resultsBtn.disabled = true;
       this.listenerIds.push(this.resultsBtn.addEventListener(
         'click',
-        () => this.comparator.showResults())
+        () => {
+          this.comparator.showResults();
+          this.setConditionOfBtns(true);
+          this.clearDistributorContainer();
+        })
       );
     }
-    if (this.downloadResultBtn !== null) {
-      this.listenerIds.push(this.downloadResultBtn.addEventListener('click', () => {
-        const resultsOfGame = this.comparator.checkResults();
-        this.toolBox.downloadFile(resultsOfGame)
-      }));
+  }
+
+  private setConditionOfBtns(condition: boolean): void {
+    if ( this.startBtn &&  this.resultsBtn) {
+      this.startBtn.disabled = condition;
+      this.resultsBtn.disabled = condition;
+    }
+  }
+
+  private getButtonsRefs(): void {
+    this.startBtn = document.getElementById('startCount') as HTMLButtonElement;
+    this.resultsBtn = document.getElementById('checkResult') as HTMLButtonElement;
+    this.clearBtn = document.getElementById('clearStores') as HTMLButtonElement;
+    this.downloadResultBtn = document.getElementById('downloadResult') as HTMLButtonElement;
+  }
+
+  private getAllInstances(): void {
+    this.storeService = StoreService.getInstance();
+    if (this.storeService) {
+      this.distributor = Distributor.getInstance();
+      this.catsContainer = CatContainer.getInstance();
+      this.dogsContainer = DogContainer.getInstance();
+      this.toolBox = Tool.getInstance();
+      this.comparator = Comparator.getInstance();
     }
   }
 

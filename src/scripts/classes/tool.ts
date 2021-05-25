@@ -63,14 +63,10 @@ class Tool {
     return boxShadowLink
   }
 
-  public downloadFile({catMismatch, dogMismatch}): void {
+  public downloadFile(fileName: string, content: string): void {
       let link = document.createElement('a');
-      link.download = 'animalResults.txt';
-      const resultData = `
-      Total Scores:
-      Cat mismatch: ${catMismatch}
-      Dog mismatch: ${dogMismatch}`;
-      let blob = new Blob([resultData], {type: 'type/plain'});
+      link.download = fileName;
+      let blob = new Blob([content], {type: 'type/plain'});
       link.href = URL.createObjectURL(blob);
       link.click();
       URL.revokeObjectURL(link.href);
