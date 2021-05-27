@@ -16,6 +16,7 @@ export namespace AnimalModel {
         addAnimalUrl(imageDetail: IPresentationDetail): void;
         addListener(img: HTMLImageElement): void;
         removeAllListeners(): void;
+        removeDrugAndDropListener(): void;
         setErrorState(): IAnimal;
     }
 

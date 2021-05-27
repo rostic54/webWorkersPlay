@@ -75,7 +75,6 @@ export class Animal implements IAnimal {
 
   public setErrorState(): IAnimal {
     this.animalImg.classList.add(ImageClasses.INCORRECT);
-    this.removeDrugAndDropListener();
     return this
   }
 

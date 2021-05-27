@@ -1,18 +1,22 @@
 import {WorkerHelper} from "../workers/Worker-helper.js";
 import {main} from "../script.js";
 import {Animal} from "./Animal.js";
+import {HttpService} from "../services/Http.service.js";
 import {PresentationType} from "../../interfaces/presentation.interface";
 import IPresentationDetail = PresentationType.IPresentationDetail;
 import {AnimalModel} from "../../interfaces/animal-response.interface";
 import IAnimal = AnimalModel.IAnimal;
+import {AnimalFactory} from "./factories/Animal-factory.js";
 
 class Tool {
   static staticCounter: number = 1;
   static instance: Tool;
   public workerHelper;
+  public httpService: HttpService;
 
   constructor() {
     this.workerHelper = new WorkerHelper();
+    this.httpService = HttpService.getInstance();
   }
 
   public static getInstance(): Tool {
@@ -42,8 +46,19 @@ class Tool {
   }
 
   public requestImage(): void {
-    this.workerHelper.getAnimal(Tool.staticCounter)
+    const source = this.isIos() ? this.getPetPicture.bind(this) : this.workerHelper.getAnimal;
+    source(Tool.staticCounter)
       .then( img => this.putAnimalToDistributorBox(img));
+  }
+
+
+  public getPetPicture(typeOfAnimal): Promise<any> {
+
+    return this.httpService.getRandomAnimal()
+      .then( (data) => {
+        const animalFact = new AnimalFactory(data[0]);
+        return (animalFact.getCreatedAnimalEntity());
+      })
   }
 
   public blackBoxCreator(): HTMLDivElement {
@@ -70,6 +85,19 @@ class Tool {
       link.href = URL.createObjectURL(blob);
       link.click();
       URL.revokeObjectURL(link.href);
+  }
+
+  public isIos() {
+    console.log(navigator);
+    return [
+        'iPad Simulator',
+        'iPhone Simulator',
+        'iPod Simulator',
+        'iPad',
+        'iPhone',
+        'iPod'
+      ].includes(navigator.platform)
+      || (navigator.userAgent.includes("Mac") && "ontouchend" in document)
   }
 
   private addAnimalUrlToStore(animal: IAnimal, imgInfo: IPresentationDetail): void {

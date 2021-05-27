@@ -10,8 +10,8 @@ export class WorkerHelper {
   }
 
   getAnimal(localCounter) {
-    const worker = new Worker('build/scripts/workers/worker.js');
-    // const localCounter = this.staticCounter;
+
+    const worker = new Worker('scripts/workers/worker.js',{ type: "module" });
 
     worker.postMessage(localCounter)
     return new Promise ((res, rej) => {

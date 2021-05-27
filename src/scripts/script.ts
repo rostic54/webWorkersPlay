@@ -86,17 +86,26 @@ class Main implements IMain {
   }
 
   private addEventListeners() {
+
     if (this.startBtn !== null) {
-      this.listenerIds.push(this.startBtn.addEventListener('click', () => this.getImage()));
+      this.listenerIds.push(this.startBtn.addEventListener(
+        'click',
+        () => {
+        this.getImage();
+      }));
     }
     if (this.newGameBtn !== null) {
-      this.listenerIds.push(this.newGameBtn.addEventListener('click', () => {
+      this.listenerIds.push(this.newGameBtn.addEventListener(
+        'click',
+        () => {
         this.clearStore();
         this.setConditionOfBtns(false);
       }));
     }
     if (this.clearBtn !== null) {
-      this.listenerIds.push(this.clearBtn.addEventListener('click', () => {
+      this.listenerIds.push(this.clearBtn.addEventListener(
+        'click',
+        () => {
         this.clearStore();
         this.setConditionOfBtns(false);
       }));

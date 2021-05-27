@@ -90,6 +90,10 @@ export class Comparator {
 
   private calculateMismatch(animalList: IAnimal[], containerType: AnimalType): IAnimal[] {
     return animalList
+      .map((animal: IAnimal) => {
+        animal.removeDrugAndDropListener();
+        return animal
+      })
       .filter((animal: IAnimal) => animal.type !== containerType)
       .map((animal: IAnimal) => animal.setErrorState())
   }

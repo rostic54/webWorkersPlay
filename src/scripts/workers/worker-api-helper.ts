@@ -1,32 +1,13 @@
-// import {AnimalType} from "../../enum/animal-type.js";
+import {HttpService} from "../services/Http.service.js";
 
 const ctxHelper: Worker = self as any;
-const animalUrls = [
-    {
-        type: 'cat',
-        url: 'https://api.thecatapi.com/v1/images/search?limit=1&size=full'
-    },
-    {
-        type: 'dog',
-        url: 'https://api.thedogapi.com/v1/images/search?limit=1&size=full'
-    }
-]
 
-
- function getPetPicture(typeOfAnimal) {
-    const randomAnimal = Math.random() > .5 ? 1 : 0;
-    return fetch(animalUrls[randomAnimal].url, {
-        method: 'GET',
-        headers: {
-            'Content-Type': 'application/json',
-            'x-api-key': '724b0a85-a654-4937-a37a-3b8d2b698ca7',
-        },
-    }).then(film => film.json())
+ function getPetPicture(): Promise<any> {
+    return HttpService.getInstance().getRandomAnimal()
 }
 
-
 ctxHelper.addEventListener('message', (e) => {
-    getPetPicture(e.data).then(([d]) => {
+    getPetPicture().then(([d]) => {
         ctxHelper.postMessage({...d, ...{animalType: null}});
     });
 })
