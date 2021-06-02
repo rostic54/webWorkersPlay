@@ -9,12 +9,13 @@ import {AnimalModel} from "../interfaces/animal-response.interface";
 import IAnimalDetail = AnimalModel.IAnimalDetail;
 import IAnimal = AnimalModel.IAnimal;
 import {Comparator} from "./classes/Comparator.js";
+import {AnimalType} from "../enum/animal-type";
 
 class Main implements IMain {
   private storeService!: StoreService;
   private comparator!: Comparator;
   private disablePlayBtn = true;
-  public startBtn!: HTMLButtonElement | null;
+  public getNewAnimalBtn!: HTMLButtonElement | null;
   public newGameBtn!: HTMLButtonElement | null;
   public resultsBtn!: HTMLButtonElement | null;
   public clearBtn!: HTMLButtonElement | null;
@@ -47,14 +48,14 @@ class Main implements IMain {
     return this.storeService.isReady()
   }
 
-  public getAnimalsByContainerType(type: number): Promise<IAnimalDetail[]> {
+  public getAnimalsByContainerType(type: AnimalType): Promise<IAnimalDetail[]> {
     return this.isStoreReady()
       .then(() => this.storeService.getAllAnimalsByContainerType(type));
   }
 
-  public addAnimalToDB(animal: IAnimalDetail) {
+  public addAnimalToDB(animal: IAnimalDetail, tableName = 'animals' ) {
     return this.isStoreReady()
-      .then(() => this.storeService.addDataToDb(animal));
+      .then(() => this.storeService.addDataToDb(animal, tableName));
   }
 
   public getImage(): void {
@@ -72,6 +73,7 @@ class Main implements IMain {
   }
 
   public storeAnimalInDistributor(animal: Animal): void {
+    this.addAnimalToDB(animal.animalDetail, 'sourceAnimals');
     setTimeout(() => this.distributor.addNewEntity(animal), 0);
   }
 
@@ -81,14 +83,26 @@ class Main implements IMain {
     }
   }
 
+  public distributorChildrenListener(mutRec) {
+    const distributorElem = mutRec[0].target;
+    console.log(distributorElem);
+    if(distributorElem.children.length > 1) {
+      this.distributor.removeAddIcon();
+      this.getNewAnimalBtn!.disabled = true;
+    } else if (distributorElem.children.length === 0){
+      this.distributor.insertAddIcon();
+      this.getNewAnimalBtn!.disabled = false;
+    }
+  }
+
   public clearDistributorContainer(): void {
     this.distributor.clearStore();
   }
 
   private addEventListeners() {
 
-    if (this.startBtn !== null) {
-      this.listenerIds.push(this.startBtn.addEventListener(
+    if (this.getNewAnimalBtn !== null) {
+      this.listenerIds.push(this.getNewAnimalBtn.addEventListener(
         'click',
         () => {
         this.getImage();
@@ -122,11 +136,25 @@ class Main implements IMain {
         })
       );
     }
+    if(this.distributor !== null) {
+      const elem = this.distributor.getDistributorElement();
+      this.listenerIds.push(
+        elem.addEventListener(
+          'click',
+          (ev) => {
+            console.log(ev);
+            if ((ev.target as HTMLElement).className === 'plus-icon') {
+              this.getImage();
+            }
+          }
+        )
+      )
+    }
   }
 
   private setConditionOfBtns(condition: boolean): void {
-    if ( this.startBtn &&  this.resultsBtn && this.newGameBtn) {
-      this.startBtn.hidden = condition;
+    if ( this.getNewAnimalBtn &&  this.resultsBtn && this.newGameBtn) {
+      this.getNewAnimalBtn.hidden = condition;
       this.newGameBtn.hidden = !condition;
       this.disablePlayBtn = !condition;
       this.resultsBtn.disabled = condition;
@@ -134,7 +162,7 @@ class Main implements IMain {
   }
 
   private getButtonsRefs(): void {
-    this.startBtn = document.getElementById('startCount') as HTMLButtonElement;
+    this.getNewAnimalBtn = document.getElementById('startCount') as HTMLButtonElement;
     this.newGameBtn = document.getElementById('newGame') as HTMLButtonElement;
     this.resultsBtn = document.getElementById('checkResult') as HTMLButtonElement;
     this.clearBtn = document.getElementById('clearStores') as HTMLButtonElement;
@@ -144,7 +172,7 @@ class Main implements IMain {
   private getAllInstances(): void {
     this.storeService = StoreService.getInstance();
     if (this.storeService) {
-      this.distributor = Distributor.getInstance();
+      this.distributor = Distributor.getInstance(this.distributorChildrenListener.bind(this));
       this.catsContainer = CatContainer.getInstance();
       this.dogsContainer = DogContainer.getInstance();
       this.toolBox = Tool.getInstance();

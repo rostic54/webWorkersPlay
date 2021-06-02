@@ -36,8 +36,6 @@ export class DogContainer {
 
   public addAnimal(mutRec): void {
     const record = mutRec[0];
-    console.log(record.addedNodes[0])
-    console.log(record.addedNodes[0]?.getAttribute('class'))
     // if ((record.addedNodes.length === 0 || record.addedNodes[0]?.getAttribute('class') === 'temporary') && record.addedNodes[0]?.nodeName === 'SPAN') {
     if (record.addedNodes.length === 0 || record.addedNodes[0]?.getAttribute('class') !== 'img-wrap') {
       return;

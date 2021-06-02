@@ -1,5 +1,6 @@
 import {AnimalModel} from "../../interfaces/animal-response.interface";
 import IAnimalDetail = AnimalModel.IAnimalDetail;
+import {AnimalType} from "../../enum/animal-type";
 
 export class StoreService {
   static instance: StoreService
@@ -18,7 +19,7 @@ export class StoreService {
 
   public isReady(): Promise<any> {
     return new Promise((res, rej) => {
-      this.openRequest = indexedDB.open("db", 1);
+      this.openRequest = indexedDB.open("db", 2);
       this.openRequest.onsuccess = (e) => this.onsuccess(e, res);
       this.openRequest.onupgradeneeded = (e) => this.onupgradeneeded(e);
       this.openRequest.onerror = (e) => {
@@ -29,14 +30,12 @@ export class StoreService {
   }
 
   private onsuccess(ev, response) {
-    console.log('onsuccess', ev);
     this.database = ev.target.result;
     response(this.database);
     // console.log(this.db.transaction('animals'), 'readwrite');
   }
 
   private onupgradeneeded(ev) {
-    console.log('onupgradeneeded ', ev)
     const db = ev.target.result;
 
     if (!db.objectStoreNames.contains('animals')) {
@@ -44,13 +43,19 @@ export class StoreService {
       animalDB.createIndex('type', 'type', {unique: false})
       animalDB.createIndex('containerType', 'containerType', {unique: false})
     }
+    if (!db.objectStoreNames.contains('sourceAnimals')) {
+      const animalDB = db.createObjectStore('sourceAnimals', {keyPath: 'id'});
+      animalDB.createIndex('type', 'type', {unique: false})
+      // animalDB.createIndex('animalType', 'animalType', {unique: false})
+    }
   }
 
-  public addDataToDb(animal: IAnimalDetail) {
+  // TODO: USE FOR STORE IN BOTH TABLES
+  public addDataToDb(animal: IAnimalDetail, tableName) {
     if (this.database) {
-      let transAct = this.database.transaction('animals', 'readwrite');
+      let transAct = this.database.transaction(tableName, 'readwrite');
       // let transAct = this.openRequest.result.transaction('animals', 'readwrite');
-      let animalTx = transAct.objectStore('animals');
+      let animalTx = transAct.objectStore(tableName);
       let request = animalTx.put(animal);
       request.onsuccess = (e) => console.log('Was added to DB');
       request.onerror = (err) => console.log('ERROR IN ADD operation:', err)
@@ -119,7 +124,7 @@ export class StoreService {
       })
   }
 
-  public getAllAnimalsByContainerType(typeOfContainer: number): Promise<IAnimalDetail[]> {
+  public getAllAnimalsByContainerType(typeOfContainer: AnimalType): Promise<IAnimalDetail[]> {
       let transAct = this.database.transaction('animals', 'readonly');
       let animals = transAct.objectStore('animals');
       const typeIndex = animals.index('containerType');

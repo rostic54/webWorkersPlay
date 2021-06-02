@@ -98,7 +98,6 @@ export class Presentation implements IPresentation {
   }
 
   private reactOnErrorState(mutRec): void {
-    console.log(mutRec);
     const wrapper = mutRec[0].target?.closest(`.${ImageClasses.WRAPPER}`);
     if(mutRec[0].attributeName === 'class' && mutRec[0].target.classList.contains(ImageClasses.INCORRECT)) {
       wrapper.classList.add('error');

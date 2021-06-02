@@ -13,6 +13,8 @@ class Tool {
   static instance: Tool;
   public workerHelper;
   public httpService: HttpService;
+  private amountOfRequests = 0;
+  private allowedRequests = 1;
 
   constructor() {
     this.workerHelper = new WorkerHelper();
@@ -46,14 +48,20 @@ class Tool {
   }
 
   public requestImage(): void {
-    const source = this.isIos() ? this.getPetPicture.bind(this) : this.workerHelper.getAnimal;
-    source(Tool.staticCounter)
-      .then( img => this.putAnimalToDistributorBox(img));
+    if (this.amountOfRequests < this.allowedRequests ) {
+      this.amountOfRequests++;
+      // Make request directly without the worker for IoS devices.
+      const source = this.isIos() ? this.getPetPicture.bind(this) : this.workerHelper.getAnimal;
+      source(Tool.staticCounter)
+        .then(img => {
+          this.amountOfRequests = 0;
+          this.putAnimalToDistributorBox(img)
+        });
+    }
   }
 
 
   public getPetPicture(typeOfAnimal): Promise<any> {
-
     return this.httpService.getRandomAnimal()
       .then( (data) => {
         const animalFact = new AnimalFactory(data[0]);
@@ -88,7 +96,6 @@ class Tool {
   }
 
   public isIos() {
-    console.log(navigator);
     return [
         'iPad Simulator',
         'iPhone Simulator',

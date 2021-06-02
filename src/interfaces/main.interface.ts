@@ -6,7 +6,7 @@ import {DogContainer} from "../scripts/classes/Dog-container";
 
 
 export interface IMain {
-  startBtn: HTMLElement | null;
+  getNewAnimalBtn: HTMLElement | null;
   catsContainer: CatContainer;
   dogsContainer: DogContainer;
   listenerIds: any[];

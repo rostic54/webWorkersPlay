@@ -8,34 +8,38 @@
     <link rel="preconnect" href="https://fonts.gstatic.com">
     <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@100;400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="styles/styles.css">
-    <title>Cat box</title>
+    <link rel="manifest" href="./manifest.json">
+    <!--ios support-->
+    <link rel="apple-touch-icon" href="./img/icons/icon-96x96.png">
+    <meta name="apple-mobile-web-app-status-bar" content="#aa7700">
+    <meta name="theme-color" content="#FFE1C4">
+    <title>Animal boxes</title>
 </head>
 <body>
 <div class="container">
     <button id="startCount">Get New Animal</button>
-    <button id="newGame">Start New Game</button>
+    <button id="newGame" hidden>Start New Game</button>
     <button id="checkResult">Show Results</button>
     <button id="clearStores">Clear all animals</button>
-    <button id="secondBtn" onclick="checker()">Check unblocked state</button>
-    <div id="distributor" class="distributor"></div>
+    <div id="distributor" class="distributor empty">
+        <span class="plus-icon">+</span>
+    </div>
     <div class="animal-blocks">
         <div class="wrap">
-            <span class="container-icon"><img alt="cat" src="src/img/cat.png"/></span>
+            <span class="container-icon"><img alt="cat" src="img/cat.png"/></span>
             <div id="catsBox" class="animal-container cats-box"></div>
         </div>
         <div class="wrap">
-            <span class="container-icon"><img alt="dog" src="src/img/dog.jpg"/></span>
+            <span class="container-icon"><img alt="dog" src="img/dog.jpg"/></span>
             <div id="dogsBox" class="animal-container dog-box"></div>
         </div>
     </div>
+
+    <div class="error-page">
+        <h3>Something went wrong</h3>
+    </div>
 </div>
 </body>
-<script type="module" src="build/scripts/script.js"></script>
-<script>
-    document.addEventListener('DOMContentLoaded', function () {
-        function checker() {
-            console.log('site has still worked & unblocked by http request');
-        }
-    })
-</script>
+<script type="module" src="scripts/script.js"></script>
+<script type="module" src="scripts/services/service-worker-helper.service.js"></script>
 </html>
