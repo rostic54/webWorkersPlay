@@ -72,9 +72,11 @@ export class DogContainer {
       .then((data: IAnimalDetail[]) => {
         this.storeAnimalEntities = data.map((anDetail: IAnimalDetail) => new AnimalFactory(anDetail).getCreatedAnimalEntity());
         this.storeAnimalEntities.forEach((animal: IAnimal) => {
-          main.elementImg(animal);
-          this.setIdOfContainer(animal.animalImg);
-          this.addAnimalToContainer(animal.animalImg);
+          main.elementImg(animal)
+            .then(_ => {
+              this.setIdOfContainer(animal.animalImg);
+              this.addAnimalToContainer(animal.animalImg);
+            });
         })
       })
   }

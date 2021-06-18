@@ -8,6 +8,7 @@ export class Presentation implements IPresentation {
   readonly height: number;
   readonly width: number;
   readonly src: string;
+  readonly stringFormat: string;
   private boxShadowLink: HTMLDivElement | null = null;
   private preViewPopup: HTMLDivElement | null = null;
   private presentationUrls: IPresentationDetail[] = [];
@@ -21,17 +22,19 @@ export class Presentation implements IPresentation {
     subtree: false
   };
 
-  constructor({height, width, url}) {
+  constructor({height, width, url, stringFormat = ''}) {
     this.height = height;
     this.width = width;
     this.src = url;
+    this.stringFormat = stringFormat;
   }
 
   public getPresentationDetail(): IPresentationDetail {
     return {
       src: this.src,
       width: `${this.width}`,
-      height: `${this.height}`
+      height: `${this.height}`,
+      stringFormat: this.stringFormat
     }
   }
 

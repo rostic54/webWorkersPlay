@@ -8,6 +8,11 @@ img, span { touch-action: none }
     width: 100%;
 }
 
+.none,
+.hidden{
+    display: none;
+}
+
 .distributor {
     position: relative;
     display: flex;
@@ -44,9 +49,15 @@ img, span { touch-action: none }
     width: 40%;
 }
 
+.animal-blocks .container-icon {
+    text-align: center;
+}
+
 .animal-blocks .container-icon img{
+    width: 100%;
     max-width: 150px;
     height: 120px;
+    margin: 0;
 }
 
 .animal-blocks .animal-container {
@@ -119,7 +130,7 @@ img.moving {
     color: #fff;
 }
 
-img {
+.distributor img {
     width: 250px;
     height: 200px;
     margin: 10px;
@@ -146,24 +157,32 @@ img {
     top: 10%;
     left: 50%;
     z-index: 2;
-    display: grid;
-    grid-template-rows: 40px 1fr 40px;
     transform: translate(-50%);
-    min-width: 350px;
+    max-width: 100%;
+    min-width: 320px;
     min-height: 300px;
     border-radius: 10px;
-    padding: 15px;
     border: 3px solid lightgrey;
     background-color: white;
 }
+.popup .container {
+    display: grid;
+    grid-template-rows: 40px 1fr 40px;
+    justify-items: center;
+}
 
 .popup .title {
-    margin: 0;
+    margin: 10px 0;
+    font-size: 18px;
 }
 
 .popup .content {
     position: relative;
     margin: 15px;
+}
+
+.popup .content.center {
+    text-align: center;
 }
 
 .popup .row {
@@ -185,4 +204,77 @@ img {
     font-size: 20px;
     font-weight: 700;
     cursor: pointer;
+}
+
+.popup .content .video {
+    width: 100%;
+    max-width: 450px;
+}
+
+.popup .content .error-message {
+    display: block;
+    margin: 5px 0;
+    font-size: 18px;
+    font-weight: bold;
+    color: red;
+}
+
+.popup .content .error-message:empty {
+    display: none;
+}
+
+.popup .photo-preview {
+    max-width: 100%;
+    width: 300px;
+}
+
+.popup #take-photo {
+    margin: 10px 0;
+
+}
+
+.popup .content #animal-grab{
+    max-width: 300px;
+}
+
+.popup .content #animal-grab:empty{
+    display: none;
+}
+
+/*// BUTONS*/
+.controls-block {
+    display: flex;
+    align-items: center;
+}
+
+button.control,
+input.control {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    margin-left: 8px;
+}
+
+button#newGame {
+    background-color: darkseagreen;
+}
+
+button#checkResult {
+    background-color: #7777e4;
+}
+
+button#clearStores {
+    background-color: #c33535;
+}
+
+button#camera-access {
+    background-color: #84909d;
+}
+
+button#clearStores img,
+button#camera-access img {
+    width: 25px;
 }

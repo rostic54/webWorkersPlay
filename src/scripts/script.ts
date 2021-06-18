@@ -10,34 +10,40 @@ import IAnimalDetail = AnimalModel.IAnimalDetail;
 import IAnimal = AnimalModel.IAnimal;
 import {Comparator} from "./classes/Comparator.js";
 import {AnimalType} from "../enum/animal-type";
+import {DataBase} from "./classes/DB.js";
+import {IndexeddbTablesName} from "../enum/indexeddb-tables-name.js";
+import {CameraManager} from "./classes/Camera-manager.js";
 
 class Main implements IMain {
   private storeService!: StoreService;
+  private dataBase!: DataBase;
   private comparator!: Comparator;
+  private cameraManager!: CameraManager;
   private disablePlayBtn = true;
-  public getNewAnimalBtn!: HTMLButtonElement | null;
+  private forbidLoadFiles = true;
   public newGameBtn!: HTMLButtonElement | null;
   public resultsBtn!: HTMLButtonElement | null;
   public clearBtn!: HTMLButtonElement | null;
   public downloadResultBtn!: HTMLButtonElement | null;
+  public makeAnimalPhotoBtn!: HTMLButtonElement | null;
   public listenerIds: any = [];
   public distributor!: Distributor;
   public catsContainer!: CatContainer;
   public dogsContainer!: DogContainer;
-  public animalsList;
-  public toolBox;
+  public animalsList!: IAnimalDetail[];
+  public toolBox!: Tool;
 
   constructor() {
   }
 
   public init(): void {
+    console.log('NAVIGATOR:', navigator.onLine);
     this.getButtonsRefs();
     this.getAllInstances();
-    this.setConditionOfBtns(false);
+    this.setConditionOfBtns(true);
 
     this.isStoreReady().then(res => {
-      console.log('RES IN MAIN:', res);
-      this.storeService.getAllAnimals()
+      this.storeService.getAllAnimals(IndexeddbTablesName.ANIMALS)
         .then(data => this.animalsList = data)
         .finally(() => console.log('GOTTEN FROM DB: ', this.animalsList))
     });
@@ -53,9 +59,14 @@ class Main implements IMain {
       .then(() => this.storeService.getAllAnimalsByContainerType(type));
   }
 
-  public addAnimalToDB(animal: IAnimalDetail, tableName = 'animals' ) {
+  public addAnimalToDB(animal: IAnimalDetail, tableName = IndexeddbTablesName.ANIMALS ) {
     return this.isStoreReady()
-      .then(() => this.storeService.addDataToDb(animal, tableName));
+      .then(() => {
+        if(tableName === IndexeddbTablesName.SOURCE_ANIMAL) {
+          // this.dataBase.addNewAnimalToOwnFBStorage(animal);
+        }
+        this.storeService.addDataToIndexedDb(animal, tableName)
+      });
   }
 
   public getImage(): void {
@@ -64,8 +75,8 @@ class Main implements IMain {
     }
   }
 
-  public elementImg(animal: IAnimal) {
-    this.toolBox.createAnimalImg(animal);
+  public elementImg(animal: IAnimal): Promise<void> {
+    return this.toolBox.createAnimalImg(animal);
   }
 
   public getDistributor(): Distributor {
@@ -73,8 +84,8 @@ class Main implements IMain {
   }
 
   public storeAnimalInDistributor(animal: Animal): void {
-    this.addAnimalToDB(animal.animalDetail, 'sourceAnimals');
-    setTimeout(() => this.distributor.addNewEntity(animal), 0);
+    this.distributor.addNewEntity(animal);
+    this.addAnimalToDB(animal.animalDetail, IndexeddbTablesName.SOURCE_ANIMAL);
   }
 
   public checkBtnCondition() {
@@ -85,13 +96,10 @@ class Main implements IMain {
 
   public distributorChildrenListener(mutRec) {
     const distributorElem = mutRec[0].target;
-    console.log(distributorElem);
     if(distributorElem.children.length > 1) {
       this.distributor.removeAddIcon();
-      this.getNewAnimalBtn!.disabled = true;
     } else if (distributorElem.children.length === 0){
       this.distributor.insertAddIcon();
-      this.getNewAnimalBtn!.disabled = false;
     }
   }
 
@@ -100,12 +108,27 @@ class Main implements IMain {
   }
 
   private addEventListeners() {
+    const upload = document.getElementById('upload') as HTMLInputElement;
+    // upload.addEventListener('change', (data) => {
+    //   if (data?.target) {
+    //     console.log(data.target.files)
+    //   }
+    // })
 
-    if (this.getNewAnimalBtn !== null) {
-      this.listenerIds.push(this.getNewAnimalBtn.addEventListener(
+    if(upload) {
+      upload.onchange = (ev) => {
+        if ( !this.forbidLoadFiles && upload.files) {
+          // @ts-ignore
+          Array.prototype.forEach.call(upload.files, i => this.toolBox.addImageAsBase64ToFB(i))
+        }
+      }
+    }
+
+    if (this.makeAnimalPhotoBtn !== null) {
+      this.listenerIds.push(this.makeAnimalPhotoBtn.addEventListener(
         'click',
         () => {
-        this.getImage();
+        this.cameraManager.getAccessToCamera()
       }));
     }
     if (this.newGameBtn !== null) {
@@ -129,10 +152,10 @@ class Main implements IMain {
         'click',
         () => {
           if (this.disablePlayBtn) {
+            this.setConditionOfBtns(true);
             this.comparator.showResults();
             this.clearDistributorContainer();
           }
-          this.setConditionOfBtns(true);
         })
       );
     }
@@ -142,7 +165,6 @@ class Main implements IMain {
         elem.addEventListener(
           'click',
           (ev) => {
-            console.log(ev);
             if ((ev.target as HTMLElement).className === 'plus-icon') {
               this.getImage();
             }
@@ -153,20 +175,19 @@ class Main implements IMain {
   }
 
   private setConditionOfBtns(condition: boolean): void {
-    if ( this.getNewAnimalBtn &&  this.resultsBtn && this.newGameBtn) {
-      this.getNewAnimalBtn.hidden = condition;
-      this.newGameBtn.hidden = !condition;
+    if (this.resultsBtn && this.newGameBtn && this.clearBtn) {
+      this.newGameBtn.disabled = !condition;
       this.disablePlayBtn = !condition;
       this.resultsBtn.disabled = condition;
     }
   }
 
   private getButtonsRefs(): void {
-    this.getNewAnimalBtn = document.getElementById('startCount') as HTMLButtonElement;
     this.newGameBtn = document.getElementById('newGame') as HTMLButtonElement;
     this.resultsBtn = document.getElementById('checkResult') as HTMLButtonElement;
     this.clearBtn = document.getElementById('clearStores') as HTMLButtonElement;
     this.downloadResultBtn = document.getElementById('downloadResult') as HTMLButtonElement;
+    this.makeAnimalPhotoBtn = document.getElementById('camera-access') as HTMLButtonElement;
   }
 
   private getAllInstances(): void {
@@ -177,6 +198,8 @@ class Main implements IMain {
       this.dogsContainer = DogContainer.getInstance();
       this.toolBox = Tool.getInstance();
       this.comparator = Comparator.getInstance();
+      this.dataBase = DataBase.getInstance();
+      this.cameraManager = CameraManager.getInstance();
     }
   }
 

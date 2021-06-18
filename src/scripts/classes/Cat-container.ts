@@ -71,12 +71,15 @@ export class CatContainer {
 
   public getCatsFromStore() {
     main.getAnimalsByContainerType(this.containerType)
+      // .then((data: IAnimalDetail[]) => data.map(animal => ))
       .then((data: IAnimalDetail[]) => {
         this.storeAnimalEntities = data.map((anDetail: IAnimalDetail) => new AnimalFactory(anDetail).getCreatedAnimalEntity());
         this.storeAnimalEntities.forEach((animal: IAnimal) => {
-          main.elementImg(animal);
-          this.setIdOfContainer(animal.animalImg);
-          this.addAnimalToContainer(animal.animalImg);
+          main.elementImg(animal)
+            .then(_ => {
+              this.setIdOfContainer(animal.animalImg);
+              this.addAnimalToContainer(animal.animalImg);
+            });
         })
       })
   }

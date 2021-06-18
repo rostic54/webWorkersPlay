@@ -1,5 +1,5 @@
 const ctx: Worker = self as any;
-ctx.addEventListener('message',async (e) => {
+ctx.addEventListener('message', (e) => {
     const workerHelper = new Worker('worker-api-helper.js',{ type: "module" });
     workerHelper.postMessage(e.data);
     console.log('worker:', e.data);

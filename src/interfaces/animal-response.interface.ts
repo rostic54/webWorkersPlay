@@ -28,6 +28,11 @@ export namespace AnimalModel {
         width: number;
         type: AnimalType;
         containerType: AnimalType;
+        stringFormat?: string;
+    }
+
+    export interface BlobStr {
+        blobStr: string;
     }
 
     export interface IAnimalFactory {

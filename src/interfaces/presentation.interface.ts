@@ -1,4 +1,8 @@
+import {AnimalModel} from "./animal-response.interface";
+
 export namespace PresentationType {
+  import BlobStr = AnimalModel.BlobStr;
+
   export interface IPresentation {
     src: string;
     width: number;
@@ -11,6 +15,7 @@ export namespace PresentationType {
 
   export interface IPresentationDetail {
     src: string;
+    stringFormat?: string;
     width: string;
     height: string;
   }

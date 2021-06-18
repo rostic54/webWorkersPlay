@@ -1,7 +1,7 @@
 {
   "name": "Homeless Animal",
   "short_name": "HomelessPet",
-  "start_url": "./index.html?_ijt=ckgkrf4lpjoph4sn9c3mgshv21",
+  "start_url": "./index.html",
   "display": "standalone",
   "background_color": "#FFE9D2",
   "theme_color": "#FFE1C4",

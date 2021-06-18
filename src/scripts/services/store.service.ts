@@ -6,6 +6,8 @@ export class StoreService {
   static instance: StoreService
   private openRequest;
   private database;
+  // added for keeping all animals from source and show them randomly in offline mode
+  private sourceOfAnimal: IAnimalDetail[] | null = null;
 
   private constructor() {
   }
@@ -50,26 +52,29 @@ export class StoreService {
     }
   }
 
-  // TODO: USE FOR STORE IN BOTH TABLES
-  public addDataToDb(animal: IAnimalDetail, tableName) {
-    if (this.database) {
-      let transAct = this.database.transaction(tableName, 'readwrite');
-      // let transAct = this.openRequest.result.transaction('animals', 'readwrite');
-      let animalTx = transAct.objectStore(tableName);
-      let request = animalTx.put(animal);
-      request.onsuccess = (e) => console.log('Was added to DB');
-      request.onerror = (err) => console.log('ERROR IN ADD operation:', err)
-      transAct.oncomplete = (e) => {
-        console.log('transaction finished!', e);
-        // this.getAll();
+  public addDataToIndexedDb(animal: IAnimalDetail, tableName: string): Promise<boolean> {
+    return new Promise<boolean>((resolve, reject) => {
+      if (this.database) {
+        let transAct = this.database.transaction(tableName, 'readwrite');
+        // let transAct = this.openRequest.result.transaction('animals', 'readwrite');
+        let animalTx = transAct.objectStore(tableName);
+        let request = animalTx.put(animal);
+        request.onsuccess = (e) => resolve(true)
+        request.onerror = (err) => resolve(false)
+        transAct.oncomplete = (e) => {
+          console.log('transaction finished!', e);
+          // this.getAll();
+        }
+      } else {
+        reject('Database isn\'t created');
       }
-    }
+    })
   }
 
-  public getAllAnimals(): Promise<IAnimalDetail[]> {
+  public getAllAnimals(tableName: string): Promise<IAnimalDetail[]> {
     if (this.database) {
-      let transAct = this.database.transaction('animals', 'readonly');
-      let animals = transAct.objectStore('animals');
+      let transAct = this.database.transaction(tableName, 'readonly');
+      let animals = transAct.objectStore(tableName);
       const allRequest = animals.getAll();
 
       return new Promise((res, rej) => {
@@ -101,44 +106,61 @@ export class StoreService {
     return Promise.reject(false);
   }
 
+  public getRandomItem(): Promise<IAnimalDetail> {
+    const receiveRandomAnimal = () => {
+        const randomIndex = Math.round(Math.random() * (this.sourceOfAnimal!.length - 1));
+        return this.sourceOfAnimal![randomIndex]
+    }
+    return new Promise<AnimalModel.IAnimalDetail>((res, rej) => {
+      if(this.sourceOfAnimal) {
+        res(receiveRandomAnimal())
+      }
+      this.getAllAnimals('sourceAnimals')
+        .then(animals => {
+          this.sourceOfAnimal = animals;
+          res(receiveRandomAnimal())
+        })
+    })
+  }
+
   public getAllAnimalsByType(typeOfAnimal: number): Promise<IAnimalDetail[]> {
-      let transAct = this.database.transaction('animals', 'readonly');
-      let animals = transAct.objectStore('animals');
-      const typeIndex = animals.index('type');
+    let transAct = this.database.transaction('animals', 'readonly');
+    let animals = transAct.objectStore('animals');
+    const typeIndex = animals.index('type');
 
-      //TODO: Search by all with needed type value
-      const cursorReq = typeIndex.getAll(typeOfAnimal);
+    //TODO: Search by all with needed type value
+    const cursorReq = typeIndex.getAll(typeOfAnimal);
 
-      //TODO: Searching by range.
+    //TODO: Searching by range.
 
-      // const keyRng = IDBKeyRange.only(0);
-      // const cursorReq = typeIndex.openCursor(keyRng);
+    // const keyRng = IDBKeyRange.only(0);
+    // const cursorReq = typeIndex.openCursor(keyRng);
 
-      return new Promise((res, rej) => {
-        cursorReq.onsuccess = (e) => {
-          res(e.target.result);
-        };
-        cursorReq.onerror = (err) => {
-          rej(err)
-        }
-      })
+    return new Promise((res, rej) => {
+      cursorReq.onsuccess = (e) => {
+        res(e.target.result);
+      };
+      cursorReq.onerror = (err) => {
+        rej(err)
+      }
+    })
   }
 
   public getAllAnimalsByContainerType(typeOfContainer: AnimalType): Promise<IAnimalDetail[]> {
-      let transAct = this.database.transaction('animals', 'readonly');
-      let animals = transAct.objectStore('animals');
-      const typeIndex = animals.index('containerType');
+    let transAct = this.database.transaction('animals', 'readonly');
+    let animals = transAct.objectStore('animals');
+    const typeIndex = animals.index('containerType');
 
-      //TODO: Search by all with needed type value
-      const cursorReq = typeIndex.getAll(typeOfContainer);
+    //TODO: Search by all with needed type value
+    const cursorReq = typeIndex.getAll(typeOfContainer);
 
-      return new Promise((res, rej) => {
-        cursorReq.onsuccess = (e) => {
-          res(e.target.result);
-        };
-        cursorReq.onerror = (err) => {
-          rej(err)
-        }
-      })
+    return new Promise((res, rej) => {
+      cursorReq.onsuccess = (e) => {
+        res(e.target.result);
+      };
+      cursorReq.onerror = (err) => {
+        rej(err)
+      }
+    })
   }
 }

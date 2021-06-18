@@ -50,6 +50,7 @@ export class Comparator {
 
   private createDialog(catMismatch: number, dogMismatch: number) {
     const popup = document.createElement('div');
+    const container = document.createElement('div');
     const title = document.createElement("h2");
     const download = document.createElement("button");
     download.setAttribute('id', 'downloadResult');
@@ -63,7 +64,9 @@ export class Comparator {
          <div class="row"><p class="label">Dogs Mismatch:   </p><span>${dogMismatch}</span></div>
        </div>
        <span class="close-icon">X</span>`
-    popup.append(title, listOfResults, download);
+    container.append(title, listOfResults, download);
+    container.classList.add('container');
+    popup.append(container);
     popup.classList.add('popup')
     document.body.appendChild(popup);
     const boxShadow = this.toolBox.blackBoxCreator();
