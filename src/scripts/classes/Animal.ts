@@ -8,6 +8,7 @@ import IPresentationDetail = PresentationType.IPresentationDetail;
 import IAnimal = AnimalModel.IAnimal;
 import {MotionController} from "./Motion-controller.js";
 import {ImageClasses} from "../../enum/image-classes.js";
+import {Tool} from "./Tool.js";
 
 export class Animal implements IAnimal {
   readonly presentationDetail: IPresentation;
@@ -15,11 +16,13 @@ export class Animal implements IAnimal {
   readonly movingEventHandlerRef = this.movingEventHandler.bind(this);
   readonly showInPopupEventHandlerRef = this.showInPopupEventHandler.bind(this);
   private animalElement!: HTMLImageElement;
-  private motionController: MotionController;
+  private motionController!: MotionController;
+  private toolBox: Tool;
 
   constructor(data: IAnimalDetail, PresentationEntity: IPresentation) {
     this.animalInfo = data;
     this.presentationDetail = PresentationEntity;
+    this.toolBox = Tool.getInstance();
     this.motionController = MotionController.getInstance();
   }
 
@@ -51,16 +54,20 @@ export class Animal implements IAnimal {
     this.animalElement = img;
     this.presentationDetail.addListener(img);
     this.presentationDetail.addErrorStateObserver(img);
-    this.dragAndDropEvent();
+    this.showImgInPopupEvent();
+    this.dragAndDropOrSwipeEvent();
   }
 
   public addAnimalUrl(imageDetail: IPresentationDetail): void {
     this.presentationDetail.addAnimalUrl(imageDetail);
   }
 
-  public dragAndDropEvent(): void {
-    this.animalElement.addEventListener('pointerdown', this.movingEventHandlerRef);
+  public showImgInPopupEvent() {
     this.animalElement.addEventListener('pointerup', this.showInPopupEventHandlerRef);
+  }
+
+  public dragAndDropOrSwipeEvent(): void {
+    this.animalElement.addEventListener('pointerdown', this.movingEventHandlerRef);
     this.animalElement.ondragstart = () => false;
   }
 
@@ -80,13 +87,13 @@ export class Animal implements IAnimal {
 
   private movingEventHandler(ev: PointerEvent): void {
     if (ev.button === 0 && ev.buttons === 1) {
-      this.motionController.movingEventListener(ev);
+      this.toolBox.isDesktop ? this.motionController.movingEventListener(ev) : this.motionController.swipeEventListener((ev));
     }
   }
 
   private showInPopupEventHandler(ev: PointerEvent): void {
     if (ev.button === 0 && ev.buttons === 0) {
-      this.motionController.fakePointerupEventEmit();
+      this.motionController.fakePointerupEventEmit(ev);
     }
   }
 

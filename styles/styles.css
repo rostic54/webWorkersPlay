@@ -1,3 +1,16 @@
+@media screen and (max-width: 767px) and (orientation: portrait) {
+    html {
+        transform: rotate(-90deg);
+        transform-origin: left top;
+        width: 100vh;
+        overflow-x: hidden;
+        position: absolute;
+        top: 100%;
+        left: 0;
+    }
+}
+
+
 body {
     font-family: 'Roboto Mono', monospace;
 }
@@ -13,40 +26,78 @@ img, span { touch-action: none }
     display: none;
 }
 
+/* blink effect */
+.blink {
+    animation: blink 1s steps(1, end) infinite;
+}
+
+@keyframes blink {
+    0% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0;
+    }
+    100% {
+        opacity: 1;
+    }
+}
+
+.main {
+    display: grid;
+    grid-template-areas: "cat distributor dog";
+}
+
 .distributor {
     position: relative;
     display: flex;
     align-items: center;
     justify-content: center;
+    grid-area: distributor;
     min-height: 200px;
     min-width: 300px;
     text-align: center;
     background-color: white;
     border: 2px solid gray;
-    margin: 50px auto;
+    margin: 50px 20px 15px;
 }
 
 .distributor.empty {
     background-color: lightgrey;
 }
 
-.distributor .plus-icon{
+.distributor .plus-icon {
     display: inline-block;
     font-size: 80px;
     font-weight: bold;
     cursor: pointer;
 }
 
-.animal-blocks {
-    display: flex;
-    justify-content: space-between;
-    align-items: stretch;
+.swipe-hint {
+    text-align: center;
+    height: 90px;
 }
 
-.animal-blocks .wrap {
-    display: flex;
-    flex-direction: column;
-    width: 40%;
+.swipe-hint img{
+    height: 100%;
+}
+
+.animal-blocks.wrap {
+    text-align: center;
+}
+
+.animal-blocks.wrap.cat {
+    grid-area: cat;
+    /*display: flex;*/
+    /*flex-direction: column;*/
+    /*width: 40%;*/
+}
+
+.animal-blocks.wrap.dog {
+    grid-area: dog;
+    /*display: flex;*/
+    /*flex-direction: column;*/
+    /*width: 40%;*/
 }
 
 .animal-blocks .container-icon {

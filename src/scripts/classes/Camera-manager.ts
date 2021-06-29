@@ -10,6 +10,9 @@ interface ICameraManager {
 export class CameraManager implements ICameraManager {
   static instance: CameraManager;
   public imageCapture;
+  public playedStream: Promise<void> | null = null;
+  public photoCanvas!: HTMLCanvasElement;
+  public contentPhotoCanvas!: CanvasRenderingContext2D;
   private toolBox: Tool;
   private canvas!: HTMLCanvasElement;
   private takePhotoBtn!: HTMLButtonElement;
@@ -44,8 +47,8 @@ export class CameraManager implements ICameraManager {
   }
 
   get checkedAnimalType(): string {
-    for(let i = 0; i < this.radioTypeAnimal.length; i++) {
-      if(this.radioTypeAnimal[i].checked ) {
+    for (let i = 0; i < this.radioTypeAnimal.length; i++) {
+      if (this.radioTypeAnimal[i].checked) {
         return this.radioTypeAnimal[i].value
       }
     }
@@ -62,8 +65,16 @@ export class CameraManager implements ICameraManager {
   private takePhoto() {
     this.errorMessage.innerHTML = '';
     let responseWaiter: Promise<ICreatedAnimalResponseInterface | any>;
-    if (this.imageCapture instanceof Blob) {
-      responseWaiter = this.createImageFromBlob(this.imageCapture);
+    if (this.playedStream !== null) {
+      responseWaiter = this.playedStream.then(started => {
+        this.contentPhotoCanvas?.drawImage(this.videoRef, 0, 0, this.photoCanvas.width, this.photoCanvas.height);
+        return new Promise((resolve, reject) => {
+          this.photoCanvas.toBlob(resolve, 'image/png');
+        })
+      }).then(blobImg => {
+        this.imageCapture = blobImg;
+        return this.createImageFromBlob(this.imageCapture);
+      })
     } else {
       responseWaiter = this.imageCapture.takePhoto()
         .then(this.createImageFromBlob.bind(this))
@@ -83,7 +94,10 @@ export class CameraManager implements ICameraManager {
             stringFormat: res.stringFormat
           })
           this.http.addBrandNewAnimalToBothStores(animalDetail).then(res => {
-            this.killPopup();
+            this.removeLoader();
+            this.errorMessage.style.color = 'green';
+            this.errorMessage.innerHTML = 'Photo was added to store successfully!'
+            setTimeout(() => this.killPopup(), 2000);
             console.log('Result of addition to both store', res)
           });
         } else {
@@ -155,15 +169,13 @@ export class CameraManager implements ICameraManager {
           const videoTracks = stream.getVideoTracks()
           this.track = videoTracks[0];
           if ('ImageCapture' in window) {
-
             this.imageCapture = new ImageCapture(this.track);
             if (this.videoRef) {
               this.videoRef.srcObject = stream;
             }
           } else {
-            this.polyfillForIphone(stream).then((blobImage) => {
-              this.imageCapture = blobImage;
-            })
+            this.polyfillForIphone(stream);
+            this.takePhotoBtn.disabled = true;
           }
 
         }).catch((error) => {
@@ -182,26 +194,18 @@ export class CameraManager implements ICameraManager {
     return Promise.resolve(devices)
   }
 
-  private polyfillForIphone(stream: MediaStream): Promise<any> {
-    const canvas = document.createElement('canvas');
-    const context = canvas.getContext('2d');
+  private polyfillForIphone(stream: MediaStream): void {
+    this.photoCanvas = document.createElement('canvas');
+    this.contentPhotoCanvas = this.photoCanvas.getContext('2d') as CanvasRenderingContext2D;
 
     this.videoRef.srcObject = stream;
 
-    return new Promise((resolve, reject) => {
-      this.videoRef.addEventListener('loadeddata', () => {
-        const {videoWidth, videoHeight} = this.videoRef;
-        canvas.width = videoWidth;
-        canvas.height = videoHeight;
-        this.videoRef.play().then(started => {
-          if (!this.videoRef.ended) {
-            context?.drawImage(this.videoRef, 0, 0, videoWidth, videoHeight);
-            canvas.toBlob(resolve, 'image/png');
-          }
-        }).catch(error => {
-          reject(error);
-        });
-      });
+    this.videoRef.addEventListener('loadeddata', () => {
+      const {videoWidth, videoHeight} = this.videoRef;
+      this.photoCanvas.width = videoWidth;
+      this.photoCanvas.height = videoHeight;
+      this.playedStream = this.videoRef.play();
+      this.takePhotoBtn.disabled = false;
     })
   }
 
@@ -211,6 +215,10 @@ export class CameraManager implements ICameraManager {
     document.body.appendChild(this.popupRef);
     document.body.appendChild(this.boxShadow);
     const content = this.createContentOfPopup();
+    if (!navigator.onLine) {
+      this.errorMessage.innerHTML = 'You can\'t use in offline mode'
+      this.takePhotoBtn.disabled = true;
+    }
 
     this.popupRef.append(content);
 
@@ -222,27 +230,19 @@ export class CameraManager implements ICameraManager {
   }
 
   public addListenerOfTakePhoto() {
-    // this.takePhotoBtn.classList.add('hidden')
-
-    // this.takePhotoBtn.innerHTML = 'Take a photo';
     this.takePhotoBtn.addEventListener('click', this.takePhotoFnRef);
   }
 
   public toggleTakePhotoBtn() {
     this.takePhotoBtn.classList.toggle('hidden')
-    // this.takePhotoBtn.removeEventListener('click', this.takePhotoFnRef);
   }
 
   public toggleSendToValidate() {
     this.sendToValidateBtn.classList.toggle('hidden');
   }
 
-  public removeListenerOfValidationEvent() {
-    this.takePhotoBtn.classList.add('hidden');
-    // this.takePhotoBtn.removeEventListener('click', this.sendValidateFnRef)
-  }
-
   private createContentOfPopup(): HTMLDivElement {
+    document.body.style.overflow = 'hidden';
     const container = document.createElement('div');
     const title = document.createElement("h2");
     this.takePhotoBtn = document.createElement("button");
@@ -277,7 +277,7 @@ export class CameraManager implements ICameraManager {
     return container
   }
 
-  public sendImageForValidation(resolveCb) {
+  public sendImageForValidation() {
     console.log('EVENT FROM SendImage');
     this.appendLoader();
     this.takePhotoBtn.disabled = !this.isActiveSendPhoto;
@@ -305,6 +305,8 @@ export class CameraManager implements ICameraManager {
   }
 
   public killPopup() {
+    document.body.style.overflow = 'auto';
+    this.playedStream = null;
     this.popupRef.remove();
     this.boxShadow.remove();
     this.isActiveSendPhoto = true;

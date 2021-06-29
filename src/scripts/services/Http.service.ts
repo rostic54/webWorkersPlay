@@ -5,7 +5,6 @@ import {AnimalModel} from "../../interfaces/animal-response.interface";
 import IAnimalDetail = AnimalModel.IAnimalDetail;
 import {StoreService} from "./store.service.js";
 import {IndexeddbTablesName} from "../../enum/indexeddb-tables-name.js";
-import {ICreatedAnimalResponseInterface} from "../../interfaces/created-animal-response.interface";
 
 export class HttpService {
   static instance: HttpService;
@@ -92,7 +91,6 @@ export class HttpService {
   }
 
   public addNewAnimalToFBStorage(animal: IAnimalDetail): Promise<boolean> {
-    console.log('Try To store AnimalDetail:', animal);
     return this.DbInstance.addNewAnimalToOwnFBStorage(animal).then(err => {
       if(err) {
         console.log((`Was not added ${animal.id}`))
@@ -105,13 +103,15 @@ export class HttpService {
   }
 
   public addBrandNewAnimalToBothStores(animal: IAnimalDetail): Promise<boolean> {
-
-    return Promise.all([
+    const saveImgInIndexedDB = [this.StoreService.addDataToIndexedDb(animal, IndexeddbTablesName.SOURCE_ANIMAL)];
+    // Turned off ability of addition new photo of animals to Firestore, also blocked in firestore rules.
+    const saveImgInAllStores = [
       this.StoreService.addDataToIndexedDb(animal, IndexeddbTablesName.SOURCE_ANIMAL),
       this.addNewAnimalBlobToFB(animal.id, animal.stringFormat || ''),
       this.addNewAnimalToFBStorage(animal)
-    ]).then(([toFBGallery, toIndexed, toFBAnimals]): Promise<boolean> => {
-      console.log(`toFBGallery: ${toFBGallery}, toIndexed${toIndexed}, toFBAnimals${toFBAnimals}`);
+    ]
+
+    return Promise.all(saveImgInIndexedDB).then(([toIndexed, toFBGallery = true, toFBAnimals = true]): Promise<boolean> => {
       return Promise.resolve(toIndexed && toFBGallery && toFBAnimals)
     }).catch(err => {
       console.log('ERROR OF STORING', err);

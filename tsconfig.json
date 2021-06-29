@@ -22,12 +22,16 @@
       "tslib": [
         "node_modules/tslib/tslib.js"
       ],
-      "imageCapture": [
-        "node_modules/image-capture/lib/imagecapture.js"
-      ]
+//      "imageCapture": [
+//        "node_modules/image-capture/src/imagecapture.js"
+//      ]
     }
     //    "resolveJsonModule": true
   },
+  "include": [
+    "src",
+    "decs.d.ts"
+  ],
   "exclude": [
     "build"
     //    "node_modules"

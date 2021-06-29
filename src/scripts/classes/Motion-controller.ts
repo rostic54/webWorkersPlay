@@ -19,6 +19,14 @@ export class MotionController {
   private animalElement!: HTMLImageElement | null;
   private removeFunctionRef;
   private motionHistory = new Map();
+  private startSwipeEvent!: PointerEvent | null;
+  private finishSwipeEvent!: PointerEvent | null;
+  private swipeLimits = {
+    minDist: 60,
+    maxDist: 150,
+    minTime: 50,
+    maxTime: 700
+  }
 
   private constructor() {
   }
@@ -38,6 +46,14 @@ export class MotionController {
     this.moveImgRef = this.moveImg.bind(this);
     this.windowOutListener();
     window.addEventListener('pointermove', this.moveImgRef)
+  }
+
+  public swipeEventListener(ev): void {
+    this.startSwipeEvent = ev;
+    this.animalElement = ev.target;
+    const lastLocationId = this.animalElement?.getAttribute('data-from') || ContainersId.DISTRIBUTOR;
+    this.containerForInserting = this.lastHomeContainer = document.getElementById(lastLocationId);
+
   }
 
   private addElementMotionHistory(containerToInsert: string): void {
@@ -104,7 +120,31 @@ export class MotionController {
     return null;
   }
 
-  public fakePointerupEventEmit() {
+  private swipeResultCalculation(): boolean {
+    if( this.startSwipeEvent && this.finishSwipeEvent) {
+      const realDiffDistance = this.finishSwipeEvent.offsetX - this.startSwipeEvent.offsetX;
+      const timeDiff = this.finishSwipeEvent.timeStamp - this.startSwipeEvent.timeStamp;
+      const positiveDiffDistance = realDiffDistance < 0 ? realDiffDistance * (-1) : realDiffDistance;
+      if (positiveDiffDistance <= this.swipeLimits.maxDist && positiveDiffDistance >= this.swipeLimits.minDist
+        && timeDiff <= this.swipeLimits.maxTime && timeDiff >= this.swipeLimits.minTime) {
+        const containerId = realDiffDistance > 0 ? ContainersId.DOG : ContainersId.CAT;
+        this.containerForInserting = document.getElementById(containerId);
+        return true
+      }
+    }
+    return false
+  }
+
+  public fakePointerupEventEmit(ev?) {
+    // @ts-ignore
+    if(ev && this.startSwipeEvent?.target.parentElement.id === ContainersId.DISTRIBUTOR) {
+      this.finishSwipeEvent = ev;
+      const wasItSwipe = this.swipeResultCalculation();
+      if (this.animalElement && wasItSwipe) {
+        this.appendTo(this.containerForInserting);
+      }
+      this.startSwipeEvent = null;
+    }
     window.removeEventListener('pointermove', this.moveImgRef);
     if (this.animalElement && this.isOutOfStoreListenerAttached) {
       this.isOutOfStoreListenerAttached = false;
@@ -115,10 +155,11 @@ export class MotionController {
       this.removeOutListener();
       this.appendTo(this.containerForInserting);
       this.removeActiveClassFromContainer();
-      // this.lastHomeContainer = this.containerForInserting;
       this.lastHomeContainer = null;
       this.containerForInserting = null;
     }
+    // this.lastHomeContainer = this.containerForInserting;
+
     document.removeEventListener('pointerleave', this.outOfWindowListenerRef);
   }
 

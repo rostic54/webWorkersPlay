@@ -15,6 +15,8 @@ export class Presentation implements IPresentation {
   private errorStateObserver: MutationObserver | undefined;
   private showPopup: boolean = true;
   private toolBox = Tool.getInstance();
+  private popupHandlerFuncRef;
+  private popupCloseEventRef;
 
   private config = {
     attributes: true,
@@ -27,6 +29,7 @@ export class Presentation implements IPresentation {
     this.width = width;
     this.src = url;
     this.stringFormat = stringFormat;
+    this.popupCloseEventRef = this.closePreview.bind(this);
   }
 
   public getPresentationDetail(): IPresentationDetail {
@@ -39,13 +42,9 @@ export class Presentation implements IPresentation {
   }
 
   public addListener(img) {
-    // this.popupHandlerFuncRef = this.popupOpen;
+    this.popupHandlerFuncRef = this.popupOpen.bind(this);
     img.addEventListener('pointerdown', () => this.showPopup = true)
-    img.addEventListener('pointerup', (ev) => {
-      if (this.showPopup && ev.button === 0 && ev.buttons === 0) {
-        this.popupOpen(ev);
-      }
-    });
+    img.addEventListener('pointerup', this.popupHandlerFuncRef);
     document.addEventListener('pointermove', () => {
       this.showPopup = false;
     })
@@ -60,10 +59,13 @@ export class Presentation implements IPresentation {
     this.errorStateObserver.observe(img, this.config);
   }
 
-  private popupOpen({target}): void {
+  private popupOpen(ev): void {
+    if (!this.showPopup || ev.button !== 0 || ev.buttons !== 0) {
+      return;
+    }
     this.preViewPopup = document.createElement('div');
-    const width = Number(target.attributes.w.value) > document.body.clientWidth ? document.body.clientWidth : target.attributes.w.value;
-    const height = Number(target.attributes.h.value) > document.body.clientHeight ? document.body.clientHeight : target.attributes.h.value;
+    const width = Number(ev.target.attributes.w.value) > document.body.clientWidth ? document.body.clientWidth : ev.target.attributes.w.value;
+    const height = Number(ev.target.attributes.h.value) > document.body.clientHeight ? document.body.clientHeight : ev.target.attributes.h.value;
     Object.assign(
       this.preViewPopup.style,
       {
@@ -79,7 +81,7 @@ export class Presentation implements IPresentation {
         border: '10px solid gray',
         marginLeft: `-${(width / 2) + 10}px`,
         marginTop: `-${(height / 2) + 10}px`,
-        backgroundImage: `url(${target.attributes.src.value})`
+        backgroundImage: `url(${ev.target.attributes.src.value})`
       })
     document.body.append(this.preViewPopup);
     this.createShadowBox();
@@ -89,13 +91,13 @@ export class Presentation implements IPresentation {
     this.boxShadowLink = this.toolBox.blackBoxCreator();
     document.body.append(this.boxShadowLink);
 
-    this.boxShadowLink.addEventListener('click', () => this.closePreview())
-    this.preViewPopup?.addEventListener('click', () => this.closePreview())
+    this.boxShadowLink.addEventListener('pointerup', this.popupCloseEventRef);
+    this.preViewPopup?.addEventListener('pointerup', this.popupCloseEventRef);
   }
 
-  private closePreview(): void {
-    this.boxShadowLink?.removeEventListener('click', this.popupOpen);
-    this.preViewPopup?.removeEventListener('click', this.popupOpen);
+  private closePreview(ev): void {
+    this.boxShadowLink?.removeEventListener('pointerup', this.popupHandlerFuncRef);
+    this.preViewPopup?.removeEventListener('pointerup', this.popupHandlerFuncRef);
     this.boxShadowLink?.remove();
     this.preViewPopup?.remove();
   }

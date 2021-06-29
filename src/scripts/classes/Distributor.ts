@@ -7,6 +7,7 @@ export class Distributor {
   private static storeElem: Element;
   private storeAnimalEntities: IAnimal[] = [];
   private static childElementObserver: MutationObserver;
+  private static mutationListeners: Function[] = [];
 
   private static config = {
     attributes: false,
@@ -21,8 +22,11 @@ export class Distributor {
     if(!Distributor.instance) {
       Distributor.instance = new Distributor();
       Distributor.storeElem = document.getElementsByClassName('distributor')[0];
-      Distributor.childElementObserver = new MutationObserver(childrenListener);
+      Distributor.childElementObserver = new MutationObserver(Distributor.instance.sendToAllListeners);
       Distributor.childElementObserver.observe(Distributor.storeElem, Distributor.config);
+    }
+    if(childrenListener) {
+      Distributor.mutationListeners.push(childrenListener)
     }
     return Distributor.instance;
   }
@@ -31,8 +35,14 @@ export class Distributor {
 
   }
 
-  public removeAddIcon(): void {
-    Distributor.storeElem?.querySelector('.plus-icon')?.remove();
+  private sendToAllListeners(mutRec): void {
+    if(Distributor.mutationListeners.length > 0) {
+      Distributor.mutationListeners.forEach( listener => listener(mutRec))
+    }
+  }
+
+  public cleanDistributorContainer(className): void {
+    Distributor.storeElem?.querySelector(className)?.remove();
     Distributor.storeElem?.classList.remove('empty');
   }
 
@@ -41,6 +51,15 @@ export class Distributor {
     span.classList.add('plus-icon');
     span.textContent = '+';
     Distributor.storeElem?.append(span);
+    Distributor.storeElem?.classList.add('empty');
+  }
+
+  public insertLoaderIcon(): void {
+    const icon = new Image();
+    icon.setAttribute('src', './img/loader.gif');
+    icon.setAttribute('class', 'loader');
+    this.cleanDistributorContainer('.plus-icon');
+    Distributor.storeElem?.append(icon);
     Distributor.storeElem?.classList.add('empty');
   }
 

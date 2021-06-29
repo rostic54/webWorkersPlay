@@ -2,6 +2,8 @@ import {AnimalModel} from "../../interfaces/animal-response.interface";
 import IAnimalDetail = AnimalModel.IAnimalDetail;
 import {AnimalType} from "../../enum/animal-type";
 
+
+// Class for working with IndexedDB
 export class StoreService {
   static instance: StoreService
   private openRequest;

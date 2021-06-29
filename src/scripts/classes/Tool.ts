@@ -16,6 +16,8 @@ class Tool {
   public httpService: HttpService;
   public defaultCatImage: HTMLImageElement = new Image();
   public defaultDogImage: HTMLImageElement = new Image();
+  public loaderIcon: HTMLImageElement = new Image();
+  public isDesktop: boolean;
   private amountOfRequests = 0;
   private allowedRequests = 1;
   private isOfflineMode = !navigator.onLine;
@@ -23,7 +25,10 @@ class Tool {
   constructor() {
     this.workerHelper = new WorkerHelper();
     this.httpService = HttpService.getInstance();
+    this.isDesktop = this.detectDevice();
     this.setDefaultAnimalImages();
+    // @ts-ignore
+    // window.DB.disableNetwork();
     window.addEventListener("online", () => {
       console.log("You are online!");
       this.isOfflineMode = false;
@@ -55,6 +60,10 @@ class Tool {
     return Tool.instance
   }
 
+  public detectDevice(): boolean {
+    return window.innerWidth > 767
+  }
+
   public putAnimalToDistributorBox(animal: Animal): void {
     this.createAnimalImg(animal)
       .then(() => main.storeAnimalInDistributor(animal));
@@ -74,9 +83,7 @@ class Tool {
     // this.downloadFile(`${animal.id}.jpg` , imgInfo.src);
 
     img.setAttribute('alt', 'animal-img');
-    // img.setAttribute('src', imgInfo.src);
     img.setAttribute('src', animalUrlData || imgInfo.src);
-    // img.setAttribute('src', defaultNode.src);
     img.setAttribute('w', imgInfo.width);
     img.setAttribute('h', imgInfo.height);
     img.setAttribute('id', animal.id);

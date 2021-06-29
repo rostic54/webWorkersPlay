@@ -1,4 +1,4 @@
-const staticCacheName = 'site-static-41';
+const staticCacheName = 'site-static-51';
 const dynamicCache = 'site-Dynamic-1';
 
 // list of urls for which need to cache data
@@ -18,6 +18,7 @@ const assets = [
     './scripts/classes/Camera-manager.js',
     './scripts/classes/Tool.js',
     './scripts/classes/DB.js',
+    './scripts/classes/Hints-manager.js',
     './scripts/classes/factories/Animal-factory.js',
     './scripts/classes/factories/Presentation-factory.js',
     './scripts/services/Http.service.js',

@@ -15,7 +15,7 @@ export class DataBase implements IDb {
     console.log('DB CREATED:', this);
     // @ts-ignore
     this.DbRef = window.DB;
-    this.listenerOfChangesInAnimals();
+    // this.listenerOfChangesInAnimals();
 
     // Update animalsDetail in same format
     // this.updateAllAnimal();
@@ -66,6 +66,16 @@ export class DataBase implements IDb {
         })
         res(animalsDetail[0]);
       })
+    })
+  }
+
+  public getAllImagesInBase65FromFB() {
+    this.getCollectionData('animalsImg').get().then(snap => {
+      snap.forEach(doc => {
+        this.allImagesOfFBInBase64Format = doc.data();
+        console.log('ALL IMAGES:', this.allImagesOfFBInBase64Format);
+      })
+
     })
   }
 

@@ -13,6 +13,7 @@ import {AnimalType} from "../enum/animal-type";
 import {DataBase} from "./classes/DB.js";
 import {IndexeddbTablesName} from "../enum/indexeddb-tables-name.js";
 import {CameraManager} from "./classes/Camera-manager.js";
+import {HintsManager} from "./classes/Hints-manager.js";
 
 class Main implements IMain {
   private storeService!: StoreService;
@@ -32,12 +33,12 @@ class Main implements IMain {
   public dogsContainer!: DogContainer;
   public animalsList!: IAnimalDetail[];
   public toolBox!: Tool;
+  public hintsManager!: HintsManager;
 
   constructor() {
   }
 
   public init(): void {
-    console.log('NAVIGATOR:', navigator.onLine);
     this.getButtonsRefs();
     this.getAllInstances();
     this.setConditionOfBtns(true);
@@ -72,6 +73,7 @@ class Main implements IMain {
   public getImage(): void {
     if (this.disablePlayBtn) {
       this.toolBox.requestImage();
+      this.distributor.insertLoaderIcon();
     }
   }
 
@@ -97,7 +99,7 @@ class Main implements IMain {
   public distributorChildrenListener(mutRec) {
     const distributorElem = mutRec[0].target;
     if(distributorElem.children.length > 1) {
-      this.distributor.removeAddIcon();
+      this.distributor.cleanDistributorContainer('.loader');
     } else if (distributorElem.children.length === 0){
       this.distributor.insertAddIcon();
     }
@@ -163,7 +165,7 @@ class Main implements IMain {
       const elem = this.distributor.getDistributorElement();
       this.listenerIds.push(
         elem.addEventListener(
-          'click',
+          'pointerup',
           (ev) => {
             if ((ev.target as HTMLElement).className === 'plus-icon') {
               this.getImage();
@@ -200,6 +202,7 @@ class Main implements IMain {
       this.comparator = Comparator.getInstance();
       this.dataBase = DataBase.getInstance();
       this.cameraManager = CameraManager.getInstance();
+      this.hintsManager = HintsManager.getInstance();
     }
   }
 
