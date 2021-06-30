@@ -141,7 +141,6 @@ export class CameraManager implements ICameraManager {
         this.sendToValidateBtn.innerText = 'Send TO Validate';
         this.toggleTakePhotoBtn();
         this.toggleSendToValidate();
-        console.log('Event FRom SUBSCRIBE SendImage')
         this.sendToValidateBtn.addEventListener('click', this.sendValidateFnRef)
       } else {
         rej('Button wasn\'t created')

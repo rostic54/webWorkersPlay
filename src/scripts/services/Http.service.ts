@@ -57,9 +57,12 @@ export class HttpService {
   public getRandomAnimal(getAnimalFromFirestore = false, offlineMode = false): Promise<IAnimalDetail> {
     console.log('NETWORK COND:', navigator.onLine);
     console.log('NETWORK COND PARAM:', offlineMode);
+
+    // Take random animals from IndexedDB if network is absent
     if (offlineMode || !navigator.onLine) {
       return this.StoreService.getRandomItem();
     }
+    // usual mode taking from firestore
     if (getAnimalFromFirestore) {
       return this.getRandomAnimalFromFBStore();
     }

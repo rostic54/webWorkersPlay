@@ -1,5 +1,5 @@
 "use strict";
-const staticCacheName = 'site-static-41';
+const staticCacheName = 'site-static-52';
 const dynamicCache = 'site-Dynamic-1';
 // list of urls for which need to cache data
 const assets = [
@@ -18,6 +18,7 @@ const assets = [
     './scripts/classes/Camera-manager.js',
     './scripts/classes/Tool.js',
     './scripts/classes/DB.js',
+    './scripts/classes/Hints-manager.js',
     './scripts/classes/factories/Animal-factory.js',
     './scripts/classes/factories/Presentation-factory.js',
     './scripts/services/Http.service.js',
@@ -37,17 +38,18 @@ const assets = [
     './img/trash.svg',
     './img/camera.svg',
     './img/upload.svg',
+    './img/swipe-hint.png',
     './img/favicon.ico',
     './img/default-cat.jpg',
     './img/default-dog.jpg',
-    './img/icons/icon-72x72.png',
-    './img/icons/icon-96x96.png',
-    './img/icons/icon-128x128.png',
-    './img/icons/icon-144x144.png',
-    './img/icons/icon-152x152.png',
-    './img/icons/icon-192x192.png',
-    './img/icons/icon-384x384.png',
-    './img/icons/icon-512x512.png',
+    './img/icons/icon-72.png',
+    './img/icons/icon-96.png',
+    './img/icons/icon-128.png',
+    './img/icons/icon-144.png',
+    './img/icons/icon-152.png',
+    './img/icons/icon-192.png',
+    './img/icons/icon-384.png',
+    './img/icons/icon-512.png',
     './manifest.json',
     'https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@100;400;700&display=swap'
 ];
