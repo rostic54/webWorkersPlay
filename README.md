@@ -1,3 +1,4 @@
+PWA application for play with appeared animals. There's an abbility to add photo of animal, this flow has validation.
 
 1. install nodejs and typeScript: 
     - pkg install nodejs
